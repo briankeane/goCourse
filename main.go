@@ -1,8 +1,8 @@
 package main
 
 import (
-  "github.com/taskmanager/common"
-  "github.com/taskmanager/routers"
+  "log"
+  "net/http"
 
   "github.com/codegangsta/negroni"
   "github.com/briankeane/goCourse/common"
@@ -13,9 +13,9 @@ func main() {
   common.StartUp()
   r := routers.InitRoutes()
 
-  n := negroni.Classic
+  n := negroni.Classic()
   n.UseHandler(r)
 
-  log.PrintLn("Listening...")
-  http.ListenAndAserve(":8080", n)
+  log.Println("Listening...")
+  http.ListenAndServe(":8080", n)
 }
