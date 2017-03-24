@@ -17,7 +17,7 @@ type tasks struct{}
 
 func (tasks) FindAll() ([]*Task, error) {
 	var ts []*Task
-	return ts, common.DB.Find(nil).All(&ts)
+	return ts, common.DB.Tasks.Find(nil).All(&ts)
 }
 
 func (tasks) FindOne(id string) (*Task, error) {
@@ -37,14 +37,16 @@ func (tasks) Create(name, desc string) (*Task, error) {
 	return t, nil
 }
 
-func (tasks) Update(id, name, desc string) error {
+func (tasks) Update(id, name, desc string) (*Task, error) {
 	if err := common.DB.Tasks.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{
 		"name": name,
 		"desc": desc,
 	}}); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	var t *Task
+	return t, common.DB.Tasks.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&t)
 }
 
 func (tasks) DeleteById(id string) error {

@@ -25,3 +25,7 @@ func JsonOk(w http.ResponseWriter, res []byte, code int) {
 	w.WriteHeader(code)
 	w.Write(res)
 }
+
+func JsonStatus(w http.ResponseWriter, code int) {
+	w.WriteHeader(code)
+}

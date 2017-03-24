@@ -13,9 +13,23 @@ var Tasks = new(tasksController)
 
 type tasksController struct{}
 
+func (tc *tasksController) ShowAll(w http.ResponseWriter, r *http.Request) {
+	tasks, err := models.Tasks.FindAll()
+	if err != nil {
+		common.JsonError(w, err, http.StatusBadRequest)
+	}
+
+	res, err := json.Marshal(tasks)
+	if err != nil {
+		common.JsonError(w, err, http.StatusBadRequest)
+		return
+	}
+	common.JsonOk(w, res, http.StatusOK)
+}
+
 func (tc *tasksController) Create(w http.ResponseWriter, r *http.Request) {
 	var t models.Task
-	if err := json.NewDecoder(r.body).Decode(&t); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -39,12 +53,12 @@ func (tc *tasksController) Show(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	var t models.Task
-	if err := json.NewDecoder(r.body).Decode(&t); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	task, err := models.Tasks.Get(t.id)
+	task, err := models.Tasks.FindOne(id)
 	if err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
@@ -63,23 +77,18 @@ func (tc *tasksController) Delete(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	var t models.Task
-	if err := json.NewDecoder(r.body).Decode(&t); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	task, err := models.Tasks.Delete(t.id)
+	err := models.Tasks.DeleteById(id)
 	if err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	res, err := json.Marshal(task)
-	if err != nil {
-		common.JsonError(w, err, http.StatusBadRequest)
-		return
-	}
-	common.JsonOk(w, res, http.StatusOK)
+	common.JsonStatus(w, http.StatusOK)
 }
 
 func (tc *tasksController) Update(w http.ResponseWriter, r *http.Request) {
@@ -87,17 +96,12 @@ func (tc *tasksController) Update(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	var t models.Task
-	if err := json.NewDecoder(r.body).Decode(&t); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	task, err := models.Tasks.Update(t.id)
-	if err != nil {
-		common.JsonError(w, err, http.StatusBadRequest)
-		return
-	}
-
+	task, err := models.Tasks.Update(id, t.Name, t.Desc)
 	res, err := json.Marshal(task)
 	if err != nil {
 		common.JsonError(w, err, http.StatusBadRequest)
